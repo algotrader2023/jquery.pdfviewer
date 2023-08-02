@@ -8,7 +8,7 @@
 
     let version = $().jquery;
     version = version.split('.');
-    //Define the pdfviewer plugin
+    //Define the pdf viewer plugin
     $.fn.pdfViewer = function (url, options) {
         const defaultOptions = {
             orientation: 'landscape',
