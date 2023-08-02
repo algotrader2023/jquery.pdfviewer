@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PdfViewer | JQuery</title>
+
+    <link rel="stylesheet" href="css/pdfviewer.jquery.css">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/pdf.js"></script>
+    <script src="js/pdfviewer.jquery.js"></script>
+</head>
+<body>
+    <noscript>This browser does not support javascript</noscript>
+    <div id="pdfviewer"></div>
+
+    <script type="text/javascript">
+        const options = {
+            width: 900,
+            height: 600,
+        };
+        $('#pdfviewer').pdfViewer('assets/newton.pdf', options);
+    </script>
+</body>
+</html>
