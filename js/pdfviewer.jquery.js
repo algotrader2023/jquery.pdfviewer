@@ -10,16 +10,25 @@
     version = version.split('.');
     //Define the pdf viewer plugin
     $.fn.pdfViewer = function (url, options) {
+        const date = new Date();
         const defaultOptions = {
             orientation: 'landscape',
             pageSize: 'A4',
             documentUrl: url,
+            isBase64: false,
+            filename: "DOCUMENT_" + date.getDay() + '_' + date.getMonth() + '_' + date.getFullYear(),
             width: 900,
             height: 600
         };
 
         let settings = $.extend({}, defaultOptions, options);
         let documentName = settings.documentUrl;
+
+        //The separator of the base64 pdf data and its mime type
+        const base64Marker = ';base64,';
+        let rawPdfData = null;
+        if(settings.isBase64)
+            rawPdfData = convertDataURIToBinary(url);
 
         const initialState = {
             pdfDoc: null,
@@ -57,6 +66,10 @@
         //Read the whole document
         pdfjsLib.getDocument(documentName).promise.then((doc) => {
             initialState.pdfDoc = doc;
+            //store the document raw data for download and print purpose
+            doc.getData().then(arrayBuffer => {
+                rawPdfData = arrayBuffer;//Uint8Array
+            });
             doc.getMetadata().then(metadata => {
                 //if the document has a title
                if(metadata.info.Title)
@@ -113,6 +126,43 @@
             else
                 initialState.currentPage = 1;
         };
+
+        /**
+         * Convert tye URI data to a typed array
+         * @param dataURI The data to convert
+         * @returns {Uint8Array} a typed array of the same data
+         */
+        const convertDataURIToBinary = (dataURI) => {
+            const base64Index = dataURI.indexOf(base64Marker) + base64Marker.length;
+            const base64 = dataURI.substring(base64Index);
+            const raw = window.atob(base64);
+            const rawLength = raw.length;
+            const array = new Uint8Array(new ArrayBuffer(rawLength));
+
+            for(let i = 0; i < rawLength; i++) {
+                array[i] = raw.charCodeAt(i);
+            }
+            return array;
+        }
+
+        /**
+         * Force a file to be downloaded within the browser
+         * @param data the file data to be downloaded
+         * @param filename the name of the file to download
+         */
+        const downloadInBrowser = (function(){
+            let a = document.createElement('a');
+            a.style.display = "none";
+            container.appendChild(a);
+            return function (data, filename, isBase64){
+                data = new Blob([rawPdfData], {type: "application/pdf"});
+                //generate the link
+                a.href = window.URL.createObjectURL(data);
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(data);
+            };
+        }());
 
         //This function navigate to the previous age
         const showPreviousPage = () => {
@@ -193,11 +243,11 @@
             //if the user presses the Enter key
             if (keycode === 13) {
                 // Get the new page number and render it.
-                let pageNumber = window.parseInt($('#current-page').val());
+                let pageNumber = window.parseInt($(this).val());
 
                 initialState.currentPage = Math.min(Math.max(pageNumber, 1), initialState.pdfDoc._pdfInfo.numPages);
                 goToPage(initialState.currentPage);
-                $('#current-page').val(initialState.currentPage);
+                $(this).val(initialState.currentPage);
             }
         });
 
@@ -214,12 +264,21 @@
         $('span#btn-last').on('click', function (e) {
             showLastPage();
         });
-        //Zoom functionnalities
+        //Zoom functionalities
         $('span#btn-zoom-in').on('click', function (e) {
             zoomIn();
         });
         $('span#btn-zoom-out').on('click', function (e) {
             zoomOut();
+        });
+        $('span#btn-download').on('click', function (e) {
+            downloadInBrowser(rawPdfData, settings.filename, settings.isBase64);
+        });
+        $('span#btn-print').on('click', function (e){
+            let data = new Blob([rawPdfData], {type: "application/pdf"});
+           let dataUrl = window.URL.createObjectURL(data);
+           //open the window
+           container.executeCommand('print');
         });
         $('select#zoom-list').on('change', function (e) {
             let selectedZoom = $('select#zoom-list option:selected').val();
