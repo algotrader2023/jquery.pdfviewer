@@ -33,15 +33,17 @@
         //Add the toolbar to the pdf viewer
         $(this).append('<div class="pdf-toolbar">' +
                             '<span class="pdf-toolbar-title" id="doc-title">Pdf Viewer 1.0</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-first">&#8249;&#8249;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-prev">&#8249;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-next">&#8250;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-last">&#8250;&#8250;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-print" title="Print">&#x1F5B6;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-download" title="Download">&#x2193;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-first" title="First page">&#8249;&#8249;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-prev" title="Previous page">&#8249;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-next" title="Next page">&#8250;</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-last" title="Last page">&#8250;&#8250;</span>' +
                             '<input type="number" placeholder="0" id="current-page"><span id="page-number-sep">of</span> ' +
                             '<span id="page-number">0</span>' +
                             '<select class="pdf-toolbar-zoom" id="zoom-list"><option value="0.25">25%</option><option value="0.50">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.50">150%</option><option value="2.0">200%</option></select>' +
-                            '<span class="pdf-toolbar-btn" id="btn-zoom-in">+</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-zoom-out">-</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-zoom-in" title="Zoom In">+</span>' +
+                            '<span class="pdf-toolbar-btn" id="btn-zoom-out" title="Zoom Out">-</span>' +
                         '</div>');
 
         //Add the pdf body
@@ -50,7 +52,7 @@
         $('#zoom-list').prop('selectedIndex', 3);
         //Set the widht and height of the pdf viewer
         $('div#pdfviewer').css({'width': settings.width + 'px', 'height': settings.height + 'px'});
-        //Get the parent that will hosts all pages
+        //Get the parent that will host all pages
         const container = document.getElementById('page-container');
         //Read the whole document
         pdfjsLib.getDocument(documentName).promise.then((doc) => {
