@@ -27,7 +27,7 @@
         //The separator of the base64 pdf data and its mime type
         const base64Marker = ';base64,';
         let rawPdfData = null;
-        if(settings.isBase64)
+        if (settings.isBase64)
             rawPdfData = convertDataURIToBinary(url);
 
         const initialState = {
@@ -41,19 +41,19 @@
 
         //Add the toolbar to the pdf viewer
         $(this).append('<div class="pdf-toolbar">' +
-                            '<span class="pdf-toolbar-title" id="doc-title">Pdf Viewer 1.0</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-print" title="Print">&#x1F5B6;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-download" title="Download">&#x2193;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-first" title="First page">&#8249;&#8249;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-prev" title="Previous page">&#8249;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-next" title="Next page">&#8250;</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-last" title="Last page">&#8250;&#8250;</span>' +
-                            '<input type="number" placeholder="0" id="current-page"><span id="page-number-sep">of</span> ' +
-                            '<span id="page-number">0</span>' +
-                            '<select class="pdf-toolbar-zoom" id="zoom-list"><option value="0.25">25%</option><option value="0.50">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.50">150%</option><option value="2.0">200%</option></select>' +
-                            '<span class="pdf-toolbar-btn" id="btn-zoom-in" title="Zoom In">+</span>' +
-                            '<span class="pdf-toolbar-btn" id="btn-zoom-out" title="Zoom Out">-</span>' +
-                        '</div>');
+            '<span class="pdf-toolbar-title" id="doc-title">Pdf Viewer 1.0</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-print" title="Print">&#x1F5B6;</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-download" title="Download">&#x2193;</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-first" title="First page">&#8249;&#8249;</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-prev" title="Previous page">&#8249;</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-next" title="Next page">&#8250;</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-last" title="Last page">&#8250;&#8250;</span>' +
+            '<input type="number" placeholder="0" id="current-page"><span id="page-number-sep">of</span> ' +
+            '<span id="page-number">0</span>' +
+            '<select class="pdf-toolbar-zoom" id="zoom-list"><option value="0.25">25%</option><option value="0.50">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.50">150%</option><option value="2.0">200%</option></select>' +
+            '<span class="pdf-toolbar-btn" id="btn-zoom-in" title="Zoom In">+</span>' +
+            '<span class="pdf-toolbar-btn" id="btn-zoom-out" title="Zoom Out">-</span>' +
+            '</div>');
 
         //Add the pdf body
         $(this).append('<div class="pdf-viewer-body" id="page-container"></div>');
@@ -72,8 +72,8 @@
             });
             doc.getMetadata().then(metadata => {
                 //if the document has a title
-               if(metadata.info.Title)
-                   $('#doc-title').text(metadata.info.Title);
+                if (metadata.info.Title)
+                    $('#doc-title').text(metadata.info.Title);
             });
             //Set the total page number
             $('span#page-number').text(initialState.pdfDoc.numPages);
@@ -92,9 +92,9 @@
             $('#page-container').empty();
             //Rerender all the pages
             initialState.pdfDoc
-                        //Load the first page
-                        .getPage(initialState.currentPage)
-                        .then(renderPage);
+                //Load the first page
+                .getPage(initialState.currentPage)
+                .then(renderPage);
         };
         //This function render a single page to the pdf viewer
         const renderPage = (page) => {
@@ -103,7 +103,7 @@
             canvas.id = 'page-' + initialState.currentPage;
             canvas.classList.add('pdf-page');
             const ctx = canvas.getContext('2d');
-            const viewport = page.getViewport({ scale: initialState.zoom });
+            const viewport = page.getViewport({scale: initialState.zoom});
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             //Render the pdf page into the canvas context
@@ -122,8 +122,7 @@
                     //Load the next page in the pdf file
                     .getPage(initialState.currentPage)
                     .then(renderPage);
-            }
-            else
+            } else
                 initialState.currentPage = 1;
         };
 
@@ -139,7 +138,7 @@
             const rawLength = raw.length;
             const array = new Uint8Array(new ArrayBuffer(rawLength));
 
-            for(let i = 0; i < rawLength; i++) {
+            for (let i = 0; i < rawLength; i++) {
                 array[i] = raw.charCodeAt(i);
             }
             return array;
@@ -150,11 +149,11 @@
          * @param data the file data to be downloaded
          * @param filename the name of the file to download
          */
-        const downloadInBrowser = (function(){
+        const downloadInBrowser = (function () {
             let a = document.createElement('a');
             a.style.display = "none";
             container.appendChild(a);
-            return function (data, filename, isBase64){
+            return function (data, filename, isBase64) {
                 data = new Blob([rawPdfData], {type: "application/pdf"});
                 //generate the link
                 a.href = window.URL.createObjectURL(data);
@@ -274,11 +273,19 @@
         $('span#btn-download').on('click', function (e) {
             downloadInBrowser(rawPdfData, settings.filename, settings.isBase64);
         });
-        $('span#btn-print').on('click', function (e){
+        $('span#btn-print').on('click', function (e) {
             let data = new Blob([rawPdfData], {type: "application/pdf"});
-           let dataUrl = window.URL.createObjectURL(data);
-           //open the window
-           container.executeCommand('print');
+            let dataUrl = window.URL.createObjectURL(data);
+
+            if (typeof printJS === "function") {
+                printJS(dataUrl);
+            } else {
+                console.log('PrintJS is required to print document');
+                //open the window
+                let printWindow = window.open(dataUrl);
+                printWindow.print();
+            }
+
         });
         $('select#zoom-list').on('change', function (e) {
             let selectedZoom = $('select#zoom-list option:selected').val();
@@ -286,9 +293,9 @@
             zoomTo(selectedZoom);
         });
         //Listen to scroll events inside the pdf viewer
-        $('#page-container').on('scroll', function (e){
+        $('#page-container').on('scroll', function (e) {
             e.preventDefault();
-            if(initialState.pdfDoc === null)
+            if (initialState.pdfDoc === null)
                 return;
             //Get the scroll distance and update the page number
             initialState.scrollTop = $(this).scrollTop();
